@@ -188,9 +188,27 @@ Extraction and "save as" are tasks, not only blocking calls.
 
 
 
-## What the Python layer shows
+## Python package
 
-The Python package (`ArchiveReader`, `ArchiveWriter`, `Archive`) covers:
+[zarchive-py](https://pypi.org/project/zarchive-py/) is the Python package for this library. It reads, extracts, checks, and creates zip, 7z, tar, gzip, bzip2, cab, rar, and the other formats above, and it uses the same native library, including its hardware accelerations. The installed wheel carries that library for the platform it was built on. Import it as `zarchive`. Python 3.8 or newer is required.
+
+```bash
+pip install zarchive-py
+```
+
+```python
+import zarchive
+
+with zarchive.ArchiveReader("backup.zip") as arc:
+    print(arc.namelist())
+    text = arc.read("notes.txt")
+
+zarchive.create_archive("out.zip", entries=[("notes.txt", b"hello")])
+```
+
+The package is free to use, including in commercial applications, without modification. Modification and other commercial cooperation are available by agreement with the author. The license is [zarchive-py-LICENSE](https://github.com/lib-main/zArchive/blob/main/zarchive-py-LICENSE.md). zlib, bzip2, the LZMA SDK, and pklib stay under their own licenses, listed below.
+
+`ArchiveReader` opens an existing archive. `ArchiveWriter` creates one. `Archive` is the format-specific wrapper (`ZipArchive`, `SevenZArchive`, and the other classes in `zarchive`). The package covers:
 
 - identify
 - list
@@ -198,8 +216,9 @@ The Python package (`ArchiveReader`, `ArchiveWriter`, `Archive`) covers:
 - verify
 - extract
 - create
+- create self-extract package on Windows 
 
-Nested mounts, staged edit, per-member codecs, cross-format `SaveAs`, and self-extract stay on the C++ interfaces.
+Nested mounts, staged edit, per-member codecs, and cross-format `SaveAs` stay on the C++ interfaces.
 
 ---
 
