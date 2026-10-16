@@ -3,7 +3,7 @@
 **Version 1.2**
 **Effective date: 12 October 2026**
 
-Copyright (C) 2026 Leon Zhang
+Copyright (C) 2026 [Leon Zhang](mailto:leonzh.work@outlook.com)
 
 ## 1. Scope
 
@@ -45,7 +45,7 @@ Use of the unmodified Software is free, including for commercial purposes as sta
 3. support, maintenance, or service-level commitments;
 4. any terms other than those set out in this license.
 
-Contact: leonzh.work@outlook.com
+Contact: [leonzh.work@outlook.com](mailto:leonzh.work@outlook.com?subject=zArchive%20Commercial%20Inquiry)
 
 ## 7. Termination
 

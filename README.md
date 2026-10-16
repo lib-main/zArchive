@@ -1,3 +1,5 @@
+English | [简体中文](README.zh-CN.md)
+
 # zArchive
 
 **An archive is a filesystem with a staged editor — not a bag of compressed files.**
@@ -101,7 +103,7 @@ With `ARCFS_OPT_EMBEDARC`, a path component that is itself an archive is opened 
 backup.zip/inner.tar.gz/documents/report.pdf
 ```
 
-`FindOpenFileArchive` walks the path, builds a section stream over that member, and continues the lookup inside it. A file node holds `m_pEmbededArcFile` for that nested archive.
+`FindOpenFileArchive` walks the path, builds a section stream over that member, and continues the lookup inside it. The file node keeps that nested archive open.
 
 Members are marked `FILE_ITEM_CORRUPTED` or `FILE_ITEM_ENCRYPTED` as they are read.
 
@@ -126,9 +128,9 @@ ZIP's editor is the one that finishes the job: after the base commit it rewrites
 
 
 
-## Members are codec streams
+## Member files are codec streams
 
-Opening a member does not dump a blob.
+Opening a member file does not dump a blob.
 
 `OpenStream` takes `STREAM_OPEN_DECODE` and `STREAM_OPEN_DECRYPT` **separately**, so a caller can read compressed ciphertext or plaintext.
 
@@ -237,9 +239,9 @@ Nested mounts, staged edit, per-member codecs, and cross-format `SaveAs` stay on
 
 
 
-## Disclaimer
+# Disclaimer
 
-# Third-party notices
+## Third-party notices
 
 **Library:** zArchive
 
@@ -260,7 +262,6 @@ The other zLibs libraries linked or compiled into the same binary (including zCo
 | pklib            | 2003                     | Copyright (c) Ladislav Zezula 2003                            | No license text is included with this copy | PKWARE implode / explode                                    |
 
 
-Sources in this repository: `extlib/zlib`, `extlib/bzip`, `extlib/lzo`, `extlib/lzma/C`, `extlib/pklib`.
 
 ## zlib
 
@@ -294,7 +295,7 @@ Julian Seward. This program is based on the work of Mike Burrows and David Wheel
 
 LZMA SDK 26.03 is written and placed in the public domain by Igor Pavlov.
 
-The native build compiles only `Alloc.c`, `LzFind.c`, `LzmaDec.c`, and `LzmaEnc.c`. Those files are marked public domain. zArchive does not compile the rest of the 7-Zip sources in `extlib/lzma`.
+The native build compiles only `Alloc.c`, `LzFind.c`, `LzmaDec.c`, and `LzmaEnc.c`. Those files are marked public domain. zArchive does not compile the rest of the 7-Zip sources.
 
 Anyone is free to copy, modify, publish, use, compile, sell, or distribute the original LZMA SDK code, in source or binary form, for any purpose, commercial or non-commercial, and by any means.
 
