@@ -29,6 +29,19 @@ zArchive models every archive as a mounted filesystem. Format support sits under
 
 
 
+## Design principles
+
+1. **Filesystem first.** Paths, volumes, and members are the primary abstraction.
+2. **Three roles, independently implemented.** A format implements only what it genuinely supports.
+3. **Capabilities are declared, not assumed.** Traits and runtime ids say what is real.
+4. **Separable concerns.** Decode and decrypt are independent; codecs are per-member.
+5. **Reversible edits.** A staged batch commits together or rolls back.
+6. **Correctness over ratio.** Never store a larger compressed member than the original.
+
+---
+
+
+
 ## Three interfaces, independently implemented
 
 Format support sits under three separate interfaces:
@@ -218,7 +231,7 @@ The package is free to use, including in commercial applications, without modifi
 - verify
 - extract
 - create
-- create self-extract package on Windows 
+- create self-extract package on Windows
 
 Nested mounts, staged edit, per-member codecs, and cross-format `SaveAs` stay on the C++ interfaces.
 
@@ -226,20 +239,44 @@ Nested mounts, staged edit, per-member codecs, and cross-format `SaveAs` stay on
 
 
 
-## Design principles
+## Rust package
 
-1. **Filesystem first.** Paths, volumes, and members are the primary abstraction.
-2. **Three roles, independently implemented.** A format implements only what it genuinely supports.
-3. **Capabilities are declared, not assumed.** Traits and runtime ids say what is real.
-4. **Separable concerns.** Decode and decrypt are independent; codecs are per-member.
-5. **Reversible edits.** A staged batch commits together or rolls back.
-6. **Correctness over ratio.** Never store a larger compressed member than the original.
+[zarchive-rust](https://crates.io/crates/zarchive-rust) is the Rust package for this library. It reads, extracts, checks, and creates zip, 7z, tar, gzip, bzip2, cab, rar, and the other formats above, and it uses the same native library, including its hardware accelerations. A program links that library for Windows, Linux, or Android when it is built. Import it as `zarchive_rust`. Rust 1.70 or newer is required.
+
+```bash
+cargo add zarchive-rust
+```
+
+```rust
+use zarchive_rust::ArchiveReader;
+
+let mut archive = ArchiveReader::open("backup.zip")?;
+println!("{:?}", archive.namelist()?);
+let text = archive.read("notes.txt")?;
+
+zarchive_rust::create_archive("out.zip", &[("notes.txt", b"hello")], &[], None)?;
+```
+
+The package is free to use, including in commercial applications, without modification. Modification and other commercial cooperation are available by agreement with the author. The license is [zarchive-rust-LICENSE](https://github.com/lib-main/zArchive/blob/main/zarchive-rust-LICENSE.md). zlib, bzip2, the LZMA SDK, and pklib stay under their own licenses, listed below.
+
+`ArchiveReader` opens an existing archive. `ArchiveWriter` creates one. The package covers:
+
+- identify
+- list
+- read
+- verify
+- extract
+- create
+- create self-extract package on Windows
+
+Nested mounts, staged edit, per-member codecs, and cross-format `SaveAs` stay on the C++ interfaces.
 
 ---
 
 
-
 # Disclaimer
+
+
 
 ## Third-party notices
 
@@ -254,12 +291,13 @@ The other zLibs libraries linked or compiled into the same binary (including zCo
 ## Libraries compiled into the native binary
 
 
-| Library          | Version in this tree     | Copyright                                                     | License                                    | Role                                                        |
-| ---------------- | ------------------------ | ------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------- |
-| zlib             | 1.2.3 (18 July 2005)     | Copyright (C) 1995–2005 Jean-loup Gailly and Mark Adler       | zlib License                               | Deflate and gzip                                            |
-| bzip2 / libbzip2 | 1.0.3 (15 February 2005) | Copyright (C) 1996–2005 Julian R Seward                       | bzip2 License                              | bzip2                                                       |
-| LZMA SDK         | 26.03                    | Igor Pavlov. Public domain                                    | Public domain                              | LZMA (`Alloc.c`, `LzFind.c`, `LzmaDec.c`, `LzmaEnc.c` only) |
-| pklib            | 2003                     | Copyright (c) Ladislav Zezula 2003                            | No license text is included with this copy | PKWARE implode / explode                                    |
+| Library          | Version in this tree     | Copyright                                               | License                                    | Role                                                        |
+| ---------------- | ------------------------ | ------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| zlib             | 1.2.3 (18 July 2005)     | Copyright (C) 1995–2005 Jean-loup Gailly and Mark Adler | zlib License                               | Deflate and gzip                                            |
+| bzip2 / libbzip2 | 1.0.3 (15 February 2005) | Copyright (C) 1996–2005 Julian R Seward                 | bzip2 License                              | bzip2                                                       |
+| LZMA SDK         | 26.03                    | Igor Pavlov. Public domain                              | Public domain                              | LZMA (`Alloc.c`, `LzFind.c`, `LzmaDec.c`, `LzmaEnc.c` only) |
+| pklib            | 2003                     | Copyright (c) Ladislav Zezula 2003                      | No license text is included with this copy | PKWARE implode / explode                                    |
+
 
 
 
