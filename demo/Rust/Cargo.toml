@@ -1,0 +1,12 @@
+[package]
+name = "zarchive-rust-demo"
+version = "0.0.0"
+edition = "2021"
+rust-version = "1.70"
+publish = false
+description = "End-user demo for the zarchive-rust crate."
+
+[dependencies]
+# An application depends on the published crate:
+# zarchive-rust = "0.0.1-beta.2"
+zarchive-rust = { path = ".." }
