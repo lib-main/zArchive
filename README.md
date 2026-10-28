@@ -2,22 +2,22 @@ English | [简体中文](README.zh-CN.md)
 
 # zArchive
 
-**An archive is a filesystem with a staged editor — not a bag of compressed files.**
+**Read, create, and edit archives across zip, 7z, tar, gzip, and the other formats below.**
 
-zArchive models every archive as a mounted filesystem. Format support sits under three separate interfaces, and a format can implement any subset of them. The container is a detail; the filesystem is the model.
+Format support sits under three separate interfaces, and a format can implement any subset of them. `CArchiveFileSystem` mounts an archive as a volume on top of those interfaces.
 
 ```text
-                    ┌───────────────────────────────┐
-                    │        CArchiveFileSystem      │
-                    │  open · rename · move · delete │
-                    │  create folder · enumerate     │
-                    │  mount read-only · nested      │
-                    └───────────────────────────────┘
-                          ▲          ▲          ▲
-                ┌─────────┴──┐  ┌────┴─────┐  ┌─┴──────────┐
-                │IArchive    │  │IArchive  │  │IArchive    │
-                │Reader      │  │Creator   │  │Editor      │
-                └────────────┘  └──────────┘  └────────────┘
+                ┌────────────────────────────────────────────┐
+                │             CArchiveFileSystem             │
+                │ mount · open · rename · move · delete      │
+                │ create folder · enumerate · nested         │
+                └─────┴───────────────┴───────────────┴──────┘
+                      ▲               ▲               ▲
+                ┌────────────┐  ┌────────────┐  ┌────────────┐
+                │IArchive    │  │IArchive    │  │IArchive    │
+                │Reader      │  │Creator     │  │Editor      │
+                │ open · read│  │ create     │  │ staged edit│
+                └────────────┘  └────────────┘  └────────────┘
                           ▲          ▲          ▲
                 ┌─────────┴──────────┴──────────┴─────────┐
                 │ zip · gzip · bzip2 · tar · 7z · cab      │
@@ -31,12 +31,11 @@ zArchive models every archive as a mounted filesystem. Format support sits under
 
 ## Design principles
 
-1. **Filesystem first.** Paths, volumes, and members are the primary abstraction.
-2. **Three roles, independently implemented.** A format implements only what it genuinely supports.
-3. **Capabilities are declared, not assumed.** Traits and runtime ids say what is real.
-4. **Separable concerns.** Decode and decrypt are independent; codecs are per-member.
-5. **Reversible edits.** A staged batch commits together or rolls back.
-6. **Correctness over ratio.** Never store a larger compressed member than the original.
+1. **Three roles, independently implemented.** A format implements only what it genuinely supports.
+2. **Capabilities are declared, not assumed.** Traits and runtime ids say what is real.
+3. **Separable concerns.** Decode and decrypt are independent; codecs are per-member.
+4. **Reversible edits.** A staged batch commits together or rolls back.
+5. **Correctness over ratio.** Never store a larger compressed member than the original.
 
 ---
 
@@ -71,7 +70,7 @@ Traits on each format declare what it actually is:
 
 | Trait                  | Meaning                                   |
 | ---------------------- | ----------------------------------------- |
-| `ARC_TRAIT_INTERIORFS` | Has an interior tree (a real filesystem). |
+| `ARC_TRAIT_INTERIORFS` | Has an interior directory tree.          |
 | `ARC_TRAIT_ENCRYPTION` | Can encrypt.                              |
 
 
@@ -97,9 +96,9 @@ gzip, bzip2, and UUE are single-payload streams. The rest are trees.
 
 
 
-## Archive as a mounted filesystem
+## Filesystem
 
-`CArchiveFileSystem` implements the same file-system interface as a disk volume:
+`CArchiveFileSystem` mounts an archive as a volume. It uses the same kind of file-system interface a game engine uses for a disk volume:
 
 - open, rename, move, delete
 - create folder
@@ -205,25 +204,25 @@ Extraction and "save as" are tasks, not only blocking calls.
 
 ## Python package
 
-[zarchive-py](https://pypi.org/project/zarchive-py/) is the Python package for this library. It reads, extracts, checks, and creates zip, 7z, tar, gzip, bzip2, cab, rar, and the other formats above, and it uses the same native library, including its hardware accelerations. The installed wheel carries that library for the platform it was built on. Import it as `zarchive`. Python 3.8 or newer is required.
+[zarchive-py](https://pypi.org/project/zarchive-py/) is the Python package for this library. It reads, extracts, checks, and creates zip, 7z, tar, gzip, bzip2, cab, rar, and the other formats above, and it uses the same native library, including its hardware accelerations. The installed wheel carries that library for the platform it was built on. Import it as `zarchive_py`. Python 3.8 or newer is required.
 
 ```bash
 pip install zarchive-py
 ```
 
 ```python
-import zarchive
+import zarchive_py
 
-with zarchive.ArchiveReader("backup.zip") as arc:
+with zarchive_py.ArchiveReader("backup.zip") as arc:
     print(arc.namelist())
     text = arc.read("notes.txt")
 
-zarchive.create_archive("out.zip", entries=[("notes.txt", b"hello")])
+zarchive_py.create_archive("out.zip", entries=[("notes.txt", b"hello")])
 ```
 
 The package is free to use, including in commercial applications, without modification. Modification and other commercial cooperation are available by agreement with the author. The license is [zarchive-py-LICENSE](https://github.com/lib-main/zArchive/blob/main/zarchive-py-LICENSE.md). zlib, bzip2, the LZMA SDK, and pklib stay under their own licenses, listed below.
 
-`ArchiveReader` opens an existing archive. `ArchiveWriter` creates one. `Archive` is the format-specific wrapper (`ZipArchive`, `SevenZArchive`, and the other classes in `zarchive`). The package covers:
+`ArchiveReader` opens an existing archive. `ArchiveWriter` creates one. `Archive` is the format-specific wrapper (`ZipArchive`, `SevenZArchive`, and the other classes in `zarchive_py`). The package covers:
 
 - identify
 - list
@@ -233,7 +232,7 @@ The package is free to use, including in commercial applications, without modifi
 - create
 - create self-extract package on Windows
 
-Nested mounts, staged edit, per-member codecs, and cross-format `SaveAs` stay on the C++ interfaces.
+Filesystem mounts, staged edit, per-member codecs, and cross-format `SaveAs` stay on the C++ interfaces.
 
 ---
 
@@ -269,7 +268,7 @@ The package is free to use, including in commercial applications, without modifi
 - create
 - create self-extract package on Windows
 
-Nested mounts, staged edit, per-member codecs, and cross-format `SaveAs` stay on the C++ interfaces.
+Filesystem mounts, staged edit, per-member codecs, and cross-format `SaveAs` stay on the C++ interfaces.
 
 ---
 
